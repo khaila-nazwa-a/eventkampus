@@ -1,0 +1,1 @@
+<?php /**PATH C:\Users\Hype AMD\eventkampus\resources\views/event/create.blade.php ENDPATH**/ ?>
