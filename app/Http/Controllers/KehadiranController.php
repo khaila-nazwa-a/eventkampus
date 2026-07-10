@@ -2,64 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kehadiran;
 use Illuminate\Http\Request;
+use App\Models\Kehadiran;
+use App\Models\Pendaftaran;
 
 class KehadiranController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+    public function scan(Request $request)
+{
+    $pendaftaran = Pendaftaran::where('qr_code', 'like', '%' . $request->kode . '%')->first();
+
+    if (!$pendaftaran) {
+        return back()->with('error', 'QR Code tidak ditemukan.');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+    if (Kehadiran::where('pendaftaran_id', $pendaftaran->id)->exists()) {
+        return back()->with('error', 'Peserta sudah melakukan check-in.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    Kehadiran::create([
+        'pendaftaran_id' => $pendaftaran->id,
+        'waktu_scan' => now(),
+        'status' => 'Hadir'
+    ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Kehadiran $kehadiran)
-    {
-        //
-    }
+    $pendaftaran->update([
+        'status' => 'Hadir'
+    ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Kehadiran $kehadiran)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Kehadiran $kehadiran)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Kehadiran $kehadiran)
-    {
-        //
-    }
+    return back()->with('success', 'Check-in berhasil.');
+}
 }
